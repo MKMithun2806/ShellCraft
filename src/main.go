@@ -1,9 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 )
@@ -18,6 +21,14 @@ const banner = `
 `
 
 func main() {
+	versionFlag := flag.Bool("version", false, "Print version and exit")
+	flag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("ShellCraft v%s\n", Version)
+		return
+	}
+
 	// Setup signal handling
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
@@ -28,6 +39,7 @@ func main() {
 	}()
 
 	fmt.Println(banner)
+	fmt.Printf("      Version: %s\n\n", Version)
 
 	// 1. Get Attacker IP
 	ip := GetValidatedIP("Attacker IP")
@@ -60,4 +72,40 @@ func main() {
 	fmt.Printf("\n[+] Listener Command:\n    nc -lvnp %d\n", port)
 	fmt.Printf("\n[+] Finalized Payload (%s - %s):\n\n%s\n", selectedPayload.Name, selectedEncoder.Name, finalPayload)
 	fmt.Printf("\n" + strings.Repeat("=", 60) + "\n")
+
+	// Clipboard Support
+	options := []string{"Copy Payload to Clipboard", "Exit"}
+	choice := SelectOption("Post-Generation Actions", options)
+
+	if choice == 0 {
+		if err := copyToClipboard(finalPayload); err != nil {
+			fmt.Printf("[!] Failed to copy to clipboard: %v\n", err)
+		} else {
+			fmt.Println("[+] Payload copied to clipboard!")
+		}
+	}
+}
+
+func copyToClipboard(text string) error {
+	var cmd *exec.Cmd
+
+	switch runtime.GOOS {
+	case "linux":
+		if _, err := exec.LookPath("xclip"); err == nil {
+			cmd = exec.Command("xclip", "-selection", "clipboard")
+		} else if _, err := exec.LookPath("xsel"); err == nil {
+			cmd = exec.Command("xsel", "--clipboard", "--input")
+		} else {
+			return fmt.Errorf("neither xclip nor xsel found")
+		}
+	case "darwin":
+		cmd = exec.Command("pbcopy")
+	case "windows":
+		cmd = exec.Command("clip")
+	default:
+		return fmt.Errorf("unsupported platform: %s", runtime.GOOS)
+	}
+
+	cmd.Stdin = strings.NewReader(text)
+	return cmd.Run()
 }

