@@ -26,7 +26,15 @@ ShellCraft is a standalone, interactive CLI tool written in Go for generating lo
 
 Ensure you have Go installed on your system.
 
-### Option 1: Quick Install (via script)
+### Option 1: Pre-built Binaries (Recommended)
+
+You can download the latest pre-built binaries for Linux, Windows, and macOS directly from the [Releases](https://github.com/MKMithun2806/ShellCraft/releases) page.
+
+1. Download the binary for your platform.
+2. Make it executable (Linux/macOS): `chmod +x shellcraft-*`
+3. Run it: `./shellcraft-*`
+
+### Option 2: Quick Install (via script)
 
 Run the following command to download and run the installer:
 ```bash
