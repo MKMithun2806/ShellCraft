@@ -24,7 +24,7 @@ func handleListen(args []string) {
 	}
 }
 
-func handleNonInteractive(ip string, port int, pType string, enc string) {
+func handleNonInteractive(ip string, port int, pType string, enc string, obfs int) {
 	payloads := GeneratePayloads(ip, port)
 	var selectedPayload *Payload
 	
@@ -41,6 +41,9 @@ func handleNonInteractive(ip string, port int, pType string, enc string) {
 		return
 	}
 
+	// Apply Obfuscation
+	code := Obfuscate(selectedPayload.Code, obfs, selectedPayload.Name)
+
 	encoders := GetEncoders()
 	var selectedEncoder *Encoder
 	enc = strings.ToLower(enc)
@@ -55,6 +58,6 @@ func handleNonInteractive(ip string, port int, pType string, enc string) {
 		selectedEncoder = &encoders[0] // Default to Raw
 	}
 
-	finalPayload := selectedEncoder.Wrap(selectedPayload.Code)
+	finalPayload := selectedEncoder.Wrap(code)
 	fmt.Println(finalPayload)
 }
