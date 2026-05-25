@@ -1,156 +1,276 @@
-# ShellCraft
+<div align="center">
 
-[![Go Version](https://img.shields.io/github/go-mod/go-version/MKMithun2806/ShellCraft)](https://go.dev/)
-[![License](https://img.shields.io/github/license/MKMithun2806/ShellCraft)](LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/MKMithun2806/ShellCraft)](https://github.com/MKMithun2806/ShellCraft/releases)
+# 🐚 ShellCraft
 
-ShellCraft is a standalone, interactive CLI tool written in Go for generating local reverse shell payloads. It is designed for cybersecurity professionals and enthusiasts to quickly generate common and obfuscated payloads using only the Go standard library.
+**Reverse shell payload generator — interactive, obfuscated, ready to go.**
 
-## Features
+[![Go Version](https://img.shields.io/github/go-mod/go-version/MKMithun2806/ShellCraft?style=flat-square&logo=go)](https://go.dev/)
+[![License](https://img.shields.io/github/license/MKMithun2806/ShellCraft?style=flat-square)](/LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/MKMithun2806/ShellCraft?style=flat-square&logo=github)](https://github.com/MKMithun2806/ShellCraft/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/MKMithun2806/ShellCraft/release.yml?style=flat-square)](https://github.com/MKMithun2806/ShellCraft/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/MKMithun2806/ShellCraft?style=flat-square)](https://goreportcard.com/report/github.com/MKMithun2806/ShellCraft)
 
-- **Multi-Mode Generation:** Interactive guided workflow or quick CLI flags for one-liner generation.
-- **Auto IP Detection:** Use `-i auto` to auto-detect your local IP (tun0, eth0, wlan0).
-- **Expanded Payload Library:**
-  - **Linux:** Bash, NC FIFO, Python, PHP, Ruby, Perl.
-  - **Windows:** PowerShell (AMSI Bypass), CMD PowerShell one-liner, MSHTA (VBScript), Certutil Stager.
-  - **macOS:** Zsh Native.
-- **Obfuscation Engine (Levels 1-3):** Variable randomization, tick fragmentation, base64 encoding for PowerShell and Python payloads.
-- **Encoding & Wrappers:** Raw, URL Encoded, and Base64/Pipeline.
-- **Better Listener:** Start a listener with nc, socat, rlwrap, or ncat — auto-detects available tools.
-- **Listener Commands:** After generating a payload, get the matching listener command for any available listener tool.
-- **Template System:** Save and load payload configurations to speed up workflow.
-- **Custom Payloads:** Add your own payloads via CLI or interactively — persisted to disk.
-- **Payload History:** Last 20 generated payloads automatically saved with timestamps; view via `history` subcommand.
-- **AV/EDR Bypass Suggestions:** Per-payload-type evasion tips (AMSI bypass, PowerShell logging bypass, PyArmor, bash string evasion).
-- **Shell Upgrade Commands:** PTY spawn, script, socat, and stty magic suggestions for upgrading a basic shell.
-- **HTTP Delivery Methods:** Generate curl, wget, PowerShell IEX, certutil, and base64 delivery commands.
-- **C2 Framework Integration:** One-click stagers for Covenant, Sliver, Empire, and Metasploit.
-- **Clipboard Support:** Copy generated payloads directly to your clipboard (xclip/xsel/pbcopy/clip).
-- **Zero External Dependencies:** Built entirely with the Go standard library.
-- **Clean Exit:** Gracefully handles `Ctrl+C`.
+</div>
 
-## Installation
+---
 
-Ensure you have Go installed on your system.
+## ✨ Features
 
-### Option 1: Pre-built Binaries (Recommended)
+<table>
+<tr>
+<td width="50%">
 
-You can download the latest pre-built binaries for Linux, Windows, and macOS directly from the [Releases](https://github.com/MKMithun2806/ShellCraft/releases) page.
+**🚀 Generation**
+- Interactive guided workflow & CLI one-liners
+- Auto IP detection (`-i auto`)
+- 10+ payload types across Linux, Windows, macOS
+- Obfuscation engine (Levels 1–3) for PowerShell & Python
+- Encoding wrappers: Raw, URL, Base64
 
-1. Download the binary for your platform.
-2. Make it executable (Linux/macOS): `chmod +x shellcraft-*`
-3. Run it: `./shellcraft-*`
+**🎯 Post-Generation**
+- AV/EDR bypass suggestions per payload type
+- Shell upgrade commands (PTY, socat, stty)
+- HTTP delivery methods (curl, wget, IEX, certutil)
+- C2 framework stagers (Covenant, Sliver, Empire, Metasploit)
+- Clipboard copy (xclip/xsel/pbcopy/clip)
 
-### Option 2: Quick Install (via script)
+</td>
+<td width="50%">
 
-Run the following command to download and run the installer:
+**🎛️ Listeners**
+- Multi-tool listener: `nc`, `socat`, `rlwrap`, `ncat`
+- Auto-detects available tools
+- Colorized listener command suggestions
+
+**💾 Persistence**
+- Payload history (last 20, with timestamps)
+- Template system (save/load configs)
+- Custom user-defined payloads (persisted to disk)
+
+**🔧 Internals**
+- Zero external dependencies — pure Go stdlib
+- Clean `Ctrl+C` handling
+- Cross-platform (Linux, macOS, Windows)
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📦 Installation
+
+<details open>
+<summary><b>Option 1 — Pre-built binaries</b> ⭐ <i>(recommended)</i></summary>
+
+Download from the [Releases page](https://github.com/MKMithun2806/ShellCraft/releases), then:
+
+```bash
+chmod +x shellcraft-*
+./shellcraft-*
+```
+
+</details>
+
+<details>
+<summary><b>Option 2 — Quick install script</b></summary>
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/install.sh | bash
 ```
 
-### Option 3: Using go install
+</details>
+
+<details>
+<summary><b>Option 3 — <code>go install</code></b></summary>
 
 ```bash
 go install github.com/MKMithun2806/ShellCraft/cmd/shellcraft@latest
 ```
 
-### Option 4: Manual Build
+</details>
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/MKMithun2806/ShellCraft.git
-   cd ShellCraft
-   ```
-2. Build the binary:
-   ```bash
-   go build -ldflags "-X main.Version=1.0.0" -o shellcraft ./cmd/shellcraft
-   ```
+<details>
+<summary><b>Option 4 — Manual build</b></summary>
 
-## Usage
+```bash
+git clone https://github.com/MKMithun2806/ShellCraft.git
+cd ShellCraft
+go build -ldflags "-X main.Version=1.0.0" -o shellcraft ./cmd/shellcraft
+```
 
-### Interactive Mode
-Simply run the tool and follow the prompts:
+</details>
+
+---
+
+## 🎮 Usage
+
+### Interactive mode
+
 ```bash
 shellcraft
 ```
 
-### One-liner Mode (Non-interactive)
-Generate payloads instantly using CLI flags:
+Follow the prompts to configure IP, port, payload type, encoding, and obfuscation.
+
+### One-liner mode
+
 ```bash
+# Basic
 shellcraft -i 10.10.10.10 -p 4444 -t python -e base64
+
+# With auto IP and obfuscation
 shellcraft -i auto -p 4444 -t powershell -e b64 --obfs 2 --suggest
 ```
 
-**Generation Flags:**
-- `-i`: Attacker IP (use `auto` for auto-detection).
-- `-p`: Attacker Port.
-- `-t`: Payload Type (bash, nc, powershell, zsh, python, php, ruby, perl).
-- `-e`: Encoding (raw, url, b64).
-- `-obfs`: Obfuscation level 0-3 (PowerShell & Python only).
+<details>
+<summary><b>📋 Full CLI reference</b></summary>
 
-**Template Management Flags:**
-- `-list`: List all saved templates.
-- `-load <name>`: Load and run a saved template.
-- `-save <name>`: Save the current CLI flags as a template.
+#### Generation flags
 
-**Extra Output Flags:**
-- `-suggest`: Show AV/EDR bypass tips and shell upgrade commands.
-- `-delivery`: Show HTTP delivery methods (curl, wget, IEX, etc.).
-- `-c2`: Show C2 framework integration stagers.
+| Flag | Description | Example |
+|------|-------------|---------|
+| `-i` | Attacker IP (`auto` for auto-detection) | `-i 10.0.0.1` |
+| `-p` | Attacker port | `-p 4444` |
+| `-t` | Payload type | `-t powershell` |
+| `-e` | Encoding: `raw`, `url`, `b64` | `-e b64` |
+| `-obfs` | Obfuscation level 0–3 (PS & Python) | `-obfs 2` |
 
-**Custom Payload Flags:**
-- `-add-custom name:code[:type:os]`: Add a custom payload from CLI.
-- `-list-custom`: List all custom payloads.
-- `-delete-custom <index>`: Delete a custom payload by index.
+#### Template flags
+
+| Flag | Description |
+|------|-------------|
+| `-list` | List saved templates |
+| `-load <name>` | Load and run a template |
+| `-save <name>` | Save current config as template |
+
+#### Extra output flags
+
+| Flag | Description |
+|------|-------------|
+| `-suggest` | Show AV/EDR bypass & shell upgrade tips |
+| `-delivery` | Show HTTP delivery methods |
+| `-c2` | Show C2 framework stagers |
+
+#### Custom payload flags
+
+| Flag | Description |
+|------|-------------|
+| `-add-custom name:code[:type:os]` | Add a custom payload |
+| `-list-custom` | List custom payloads |
+| `-delete-custom <index>` | Delete by index |
+
+</details>
 
 ### Subcommands
 
-**Listener:**
+<details open>
+<summary><b>🎧 Listener</b></summary>
+
 ```bash
-shellcraft listen 4444         # netcat (auto-detected)
-shellcraft listen 4444 socat   # socat
-shellcraft listen 4444 rlwrap  # rlwrap + nc (interactive TTY)
-shellcraft listen 4444 ncat    # ncat (Nmap)
+# Auto-detect available listener
+shellcraft listen 4444
+
+# Specific listener type
+shellcraft listen 4444 socat
+shellcraft listen 4444 rlwrap
+shellcraft listen 4444 ncat
 ```
 
-**Payload History:**
+</details>
+
+<details>
+<summary><b>📜 Payload history</b></summary>
+
 ```bash
 shellcraft history
 ```
-Displays the last 20 generated payloads with timestamps.
 
-**Custom Payloads:**
+Shows the last 20 generated payloads with timestamps, IP, port, type, and encoder.
+
+</details>
+
+<details>
+<summary><b>🧩 Custom payloads</b></summary>
+
 ```bash
-shellcraft custom-payload list            # list all custom payloads
-shellcraft custom-payload add             # interactive add
-shellcraft custom-payload delete <index>  # delete by index
+shellcraft custom-payload list
+shellcraft custom-payload add            # interactive
+shellcraft custom-payload delete <index>
 ```
 
-**Version:**
+Custom payloads are automatically merged into the interactive payload selection menu.
+
+</details>
+
+<details>
+<summary><b>ℹ️ Version</b></summary>
+
 ```bash
 shellcraft version
 ```
 
-### Interactive Mode Features
+</details>
 
-- **Template Loading:** If saved templates exist, you'll be prompted to load one on startup.
-- **Custom Payloads:** Custom payloads are merged into the payload selection list.
-- **Obfuscation:** After selecting a PowerShell or Python payload, choose an obfuscation level.
-- **Post-Generation Menu:** After a payload is generated, choose from:
-  - Copy to clipboard
-  - Save as template
-  - Show AV/EDR bypass & shell upgrade tips
-  - Show HTTP delivery methods
-  - Show C2 framework integration
-  - Add a custom payload
+### Post-generation menu
 
-## Uninstallation
+After generating a payload interactively, the menu lets you:
 
-To remove ShellCraft:
+| # | Action |
+|---|--------|
+| 1 | 📋 Copy payload to clipboard |
+| 2 | 💾 Save as template |
+| 3 | 🛡️ Show AV/EDR bypass & shell upgrade tips |
+| 4 | 🌐 Show HTTP delivery methods |
+| 5 | 🏗️ Show C2 framework integration |
+| 6 | ➕ Add a custom payload |
+| 7 | 🚪 Exit |
+
+---
+
+## 🧪 Payload reference
+
+| OS | Payload | Notes |
+|----|---------|-------|
+| 🐧 Linux | Bash, NC FIFO, Python, PHP, Ruby, Perl | — |
+| 🪟 Windows | PowerShell (AMSI Bypass), CMD, MSHTA (VBScript), Certutil Stager | Includes signature evasion |
+| 🍏 macOS | Zsh Native | Native `ztcp` |
+
+### Obfuscation levels
+
+| Level | PowerShell | Python |
+|-------|------------|--------|
+| 0 | None | None |
+| 1 | Tick fragmentation keywords | Base64 exec wrapper |
+| 2 | Variable name randomization | Base64 exec wrapper |
+| 3 | Variable randomization + string concatenation | Base64 exec wrapper |
+
+---
+
+## 🤖 CI/CD
+
+Releases are built automatically via GitHub Actions:
+
+- **On tag push** (`v*`): builds for `linux`/`windows`/`macos` × `amd64`/`arm64` → creates a GitHub Release
+- **Manual trigger**: go to **Actions → Release → "Run workflow"** — optionally provide a `tag_name` to also create a release
+
+---
+
+## 🗑️ Uninstall
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/uninstall.sh | bash
 ```
 
-## Disclaimer
+---
 
-This tool is intended for legal, authorized security testing and educational purposes only. Do not use it for malicious activities.
+## ⚠️ Disclaimer
+
+> This tool is intended for **legal, authorized security testing and educational purposes only**.  
+> Do not use it for malicious activities. The authors are not responsible for misuse.
+
+---
+
+<div align="center">
+Made with Go &nbsp;·&nbsp; No external dependencies
+</div>
