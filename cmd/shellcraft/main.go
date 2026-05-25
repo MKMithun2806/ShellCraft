@@ -55,7 +55,11 @@ func main() {
 
 	// 1. Handle Template Listing
 	if *listFlag {
-		templates, _ := ListTemplates()
+		templates, err := ListTemplates()
+		if err != nil {
+			fmt.Printf("[!] Error loading templates: %v\n", err)
+			return
+		}
 		if len(templates) == 0 {
 			fmt.Println("[!] No templates found.")
 			return
@@ -69,7 +73,11 @@ func main() {
 
 	// 2. Handle Template Loading (Non-interactive)
 	if *loadFlag != "" {
-		templates, _ := ListTemplates()
+		templates, err := ListTemplates()
+		if err != nil {
+			fmt.Printf("[!] Error loading templates: %v\n", err)
+			return
+		}
 		var found *Template
 		for _, t := range templates {
 			if strings.EqualFold(t.Name, *loadFlag) {
@@ -114,8 +122,8 @@ func main() {
 		os.Exit(0)
 	}()
 
-	fmt.Println(banner)
-	fmt.Printf("      Version: %s\n\n", Version)
+	fmt.Print(banner)
+	fmt.Printf("      Version: %s\n", Version)
 
 	var ip string
 	var port int
@@ -123,7 +131,10 @@ func main() {
 	var selectedEncoder Encoder
 
 	// Template Selection
-	templates, _ := ListTemplates()
+	templates, err := ListTemplates()
+	if err != nil {
+		fmt.Printf("[!] Warning: Could not load templates: %v\n", err)
+	}
 	if len(templates) > 0 {
 		fmt.Println("[*] Saved Templates found.")
 		options := []string{"Use a Template", "Continue without Template"}

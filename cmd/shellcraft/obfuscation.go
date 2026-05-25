@@ -5,12 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"time"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 func Obfuscate(payload string, level int, pType string) string {
 	if level <= 0 {
