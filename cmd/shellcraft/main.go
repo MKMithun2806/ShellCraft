@@ -21,11 +21,26 @@ const banner = `
 `
 
 func main() {
-	versionFlag := flag.Bool("version", false, "Print version and exit")
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "listen":
+			handleListen(os.Args[2:])
+			return
+		case "version", "--version", "-v":
+			fmt.Printf("ShellCraft v%s\n", Version)
+			return
+		}
+	}
+
+	ipFlag := flag.String("i", "", "Attacker IP")
+	portFlag := flag.Int("p", 0, "Attacker Port")
+	typeFlag := flag.String("t", "", "Payload Type (bash, nc, ps, zsh, python, php, ruby, perl)")
+	encFlag := flag.String("e", "raw", "Encoding (raw, url, b64)")
 	flag.Parse()
 
-	if *versionFlag {
-		fmt.Printf("ShellCraft v%s\n", Version)
+	// Non-interactive mode
+	if *ipFlag != "" && *portFlag != 0 && *typeFlag != "" {
+		handleNonInteractive(*ipFlag, *portFlag, *typeFlag, *encFlag)
 		return
 	}
 
@@ -41,29 +56,72 @@ func main() {
 	fmt.Println(banner)
 	fmt.Printf("      Version: %s\n\n", Version)
 
-	// 1. Get Attacker IP
-	ip := GetValidatedIP("Attacker IP")
+	var ip string
+	var port int
+	var selectedPayload Payload
+	var selectedEncoder Encoder
 
-	// 2. Get Attacker Port
-	port := GetValidatedPort("Attacker Port")
-
-	// 3. Select Payload Type
-	payloads := GeneratePayloads(ip, port)
-	payloadNames := make([]string, len(payloads))
-	for i, p := range payloads {
-		payloadNames[i] = p.Name
+	// Template Selection
+	templates, _ := ListTemplates()
+	if len(templates) > 0 {
+		fmt.Println("[*] Saved Templates found.")
+		options := []string{"Use a Template", "Continue without Template"}
+		if SelectOption("Template Menu", options) == 0 {
+			tNames := make([]string, len(templates))
+			for i, t := range templates {
+				tNames[i] = t.Name
+			}
+			tIdx := SelectOption("Select a Template", tNames)
+			t := templates[tIdx]
+			ip = t.IP
+			port = t.Port
+			
+			// Auto-select payload
+			payloads := GeneratePayloads(ip, port)
+			for _, p := range payloads {
+				if strings.Contains(strings.ToLower(p.Name), strings.ToLower(t.Type)) {
+					selectedPayload = p
+					break
+				}
+			}
+			
+			// Auto-select encoder
+			encoders := GetEncoders()
+			for _, e := range encoders {
+				if strings.Contains(strings.ToLower(e.Name), strings.ToLower(t.Encoder)) {
+					selectedEncoder = e
+					break
+				}
+			}
+			fmt.Printf("[+] Loaded Template: %s\n", t.Name)
+		}
 	}
-	payloadIdx := SelectOption("Select Payload Type", payloadNames)
-	selectedPayload := payloads[payloadIdx]
 
-	// 4. Select Encoding/Wrapper
-	encoders := GetEncoders()
-	encoderNames := make([]string, len(encoders))
-	for i, e := range encoders {
-		encoderNames[i] = e.Name
+	if ip == "" {
+		// 1. Get Attacker IP
+		ip = GetValidatedIP("Attacker IP")
+
+		// 2. Get Attacker Port
+		port = GetValidatedPort("Attacker Port")
+
+		// 3. Select Payload Type
+		payloads := GeneratePayloads(ip, port)
+		payloadNames := make([]string, len(payloads))
+		for i, p := range payloads {
+			payloadNames[i] = p.Name
+		}
+		payloadIdx := SelectOption("Select Payload Type", payloadNames)
+		selectedPayload = payloads[payloadIdx]
+
+		// 4. Select Encoding/Wrapper
+		encoders := GetEncoders()
+		encoderNames := make([]string, len(encoders))
+		for i, e := range encoders {
+			encoderNames[i] = e.Name
+		}
+		encoderIdx := SelectOption("Select Encoding/Wrapper", encoderNames)
+		selectedEncoder = encoders[encoderIdx]
 	}
-	encoderIdx := SelectOption("Select Encoding/Wrapper", encoderNames)
-	selectedEncoder := encoders[encoderIdx]
 
 	// 5. Generate and Print
 	finalPayload := selectedEncoder.Wrap(selectedPayload.Code)
@@ -73,15 +131,30 @@ func main() {
 	fmt.Printf("\n[+] Finalized Payload (%s - %s):\n\n%s\n", selectedPayload.Name, selectedEncoder.Name, finalPayload)
 	fmt.Printf("\n" + strings.Repeat("=", 60) + "\n")
 
-	// Clipboard Support
-	options := []string{"Copy Payload to Clipboard", "Exit"}
+	// Post-Generation Actions
+	options := []string{"Copy Payload to Clipboard", "Save as Template", "Exit"}
 	choice := SelectOption("Post-Generation Actions", options)
 
-	if choice == 0 {
+	switch choice {
+	case 0:
 		if err := copyToClipboard(finalPayload); err != nil {
 			fmt.Printf("[!] Failed to copy to clipboard: %v\n", err)
 		} else {
 			fmt.Println("[+] Payload copied to clipboard!")
+		}
+	case 1:
+		name := GetInput("Enter Template Name")
+		err := SaveTemplate(Template{
+			Name:    name,
+			IP:      ip,
+			Port:    port,
+			Type:    selectedPayload.Name,
+			Encoder: selectedEncoder.Name,
+		})
+		if err != nil {
+			fmt.Printf("[!] Error saving template: %v\n", err)
+		} else {
+			fmt.Println("[+] Template saved successfully!")
 		}
 	}
 }
