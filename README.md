@@ -85,7 +85,7 @@ curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/install
 <summary><b>Option 3 — <code>go install</code></b></summary>
 
 ```bash
-go install github.com/MKMithun2806/ShellCraft/cmd/shellcraft@latest
+go install github.com/MKMithun2806/ShellCraft/cmd/shellcraft@main
 ```
 
 </details>

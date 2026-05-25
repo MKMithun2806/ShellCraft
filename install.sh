@@ -10,9 +10,10 @@ if ! command -v go >/dev/null 2>&1; then
     exit 1
 fi
 
-# Clean install from GitHub using standard Go layout
-echo "[*] Running: go install github.com/MKMithun2806/ShellCraft/cmd/shellcraft@latest"
-go install github.com/MKMithun2806/ShellCraft/cmd/shellcraft@latest
+# Install from main branch (always up to date)
+INSTALL_PATH="github.com/MKMithun2806/ShellCraft/cmd/shellcraft@main"
+echo "[*] Running: go install $INSTALL_PATH"
+go install "$INSTALL_PATH"
 
 # Determine GOBIN
 GOBIN=$(go env GOBIN)
@@ -24,7 +25,6 @@ fi
 # Add Go bin to PATH if missing
 if ! echo "$PATH" | grep -q "$GOBIN"; then
     SHELL_RC="$HOME/.bashrc"
-    # Detect Zsh
     if [[ "$SHELL" == */zsh ]] || [ -f "$HOME/.zshrc" ]; then
         SHELL_RC="$HOME/.zshrc"
     fi
