@@ -2,30 +2,66 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"strings"
 )
 
-func handleListen(args []string) {
+func handleCustomPayload(args []string) {
 	if len(args) < 1 {
-		fmt.Println("[!] Usage: shellcraft listen <port>")
+		fmt.Println("[!] Usage: shellcraft custom-payload <subcommand>")
+		fmt.Println("    Subcommands: list, add, delete <index>")
 		return
 	}
-	port := args[0]
-	fmt.Printf("[*] Starting netcat listener on port %s...\n", port)
-	cmd := exec.Command("nc", "-lvnp", port)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("[!] Error running netcat: %v\n", err)
-		fmt.Println("[*] Make sure 'nc' is installed on your system.")
+	switch args[0] {
+	case "list":
+		ListCustomPayloads()
+	case "add":
+		AddCustomPayloadInteractive()
+	case "delete":
+		if len(args) < 2 {
+			fmt.Println("[!] Usage: shellcraft custom-payload delete <index>")
+			return
+		}
+		idx := 0
+		fmt.Sscanf(args[1], "%d", &idx)
+		if err := DeleteCustomPayload(idx - 1); err != nil {
+			fmt.Printf("[!] Error: %v\n", err)
+		} else {
+			fmt.Println("[+] Custom payload deleted.")
+		}
+	default:
+		fmt.Printf("[!] Unknown subcommand '%s'. Use: list, add, delete\n", args[0])
 	}
 }
 
+func handleHistory() {
+	history, err := LoadHistory()
+	if err != nil {
+		fmt.Printf("[!] Error loading history: %v\n", err)
+		return
+	}
+	if len(history) == 0 {
+		fmt.Println("[*] No history found.")
+		return
+	}
+	fmt.Println("\n--- Payload History (Last 20) ---")
+	for i, entry := range history {
+		ts := entry.Timestamp
+		if len(ts) > 19 {
+			ts = ts[:19]
+		}
+		fmt.Printf("[%d] %s | %s:%d | %s | %s\n", i+1, ts, entry.IP, entry.Port, entry.Type, entry.Encoder)
+		fmt.Printf("    Payload: %s\n\n", entry.Payload)
+	}
+}
+
+var (
+	showSuggest bool
+	showDelivery bool
+	showC2 bool
+)
+
 func handleNonInteractive(ip string, port int, pType string, enc string, obfs int) {
-	payloads := GeneratePayloads(ip, port)
+	payloads := MergeCustomPayloads(GeneratePayloads(ip, port))
 	var selectedPayload *Payload
 	
 	pType = strings.ToLower(pType)
@@ -60,4 +96,25 @@ func handleNonInteractive(ip string, port int, pType string, enc string, obfs in
 
 	finalPayload := selectedEncoder.Wrap(code)
 	fmt.Println(finalPayload)
+
+	// Save to History
+	SaveToHistory(HistoryEntry{
+		IP:      ip,
+		Port:    port,
+		Type:    selectedPayload.Name,
+		Encoder: selectedEncoder.Name,
+		Payload: finalPayload,
+	})
+
+	if showSuggest || showDelivery || showC2 {
+		if showSuggest {
+			PrintSuggestions(selectedPayload.Name, port)
+		}
+		if showDelivery {
+			PrintDeliveryMethods(ip, port, finalPayload)
+		}
+		if showC2 {
+			PrintC2Integrations(ip, port)
+		}
+	}
 }

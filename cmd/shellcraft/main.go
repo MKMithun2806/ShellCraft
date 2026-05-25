@@ -26,6 +26,12 @@ func main() {
 		case "listen":
 			handleListen(os.Args[2:])
 			return
+		case "history":
+			handleHistory()
+			return
+		case "custom-payload":
+			handleCustomPayload(os.Args[2:])
+			return
 		case "version", "--version", "-v":
 			fmt.Printf("ShellCraft v%s\n", Version)
 			return
@@ -41,7 +47,53 @@ func main() {
 	listFlag := flag.Bool("list", false, "List all saved templates")
 	loadFlag := flag.String("load", "", "Load and run a saved template")
 	saveFlag := flag.String("save", "", "Save current CLI config as a template")
+
+	deliveryFlag := flag.Bool("delivery", false, "Show HTTP delivery methods")
+	c2Flag := flag.Bool("c2", false, "Show C2 framework integration commands")
+	suggestFlag := flag.Bool("suggest", false, "Show AV/EDR bypass and shell upgrade suggestions")
+
+	addCustomFlag := flag.String("add-custom", "", "Add a custom payload (name:code:type:os)")
+	listCustomFlag := flag.Bool("list-custom", false, "List all custom payloads")
+	deleteCustomFlag := flag.Int("delete-custom", -1, "Delete a custom payload by index")
 	flag.Parse()
+
+	showSuggest = *suggestFlag
+	showDelivery = *deliveryFlag
+	showC2 = *c2Flag
+
+	if *listCustomFlag {
+		ListCustomPayloads()
+		return
+	}
+	if *deleteCustomFlag >= 0 {
+		if err := DeleteCustomPayload(*deleteCustomFlag - 1); err != nil {
+			fmt.Printf("[!] Error deleting custom payload: %v\n", err)
+		} else {
+			fmt.Println("[+] Custom payload deleted.")
+		}
+		return
+	}
+	if *addCustomFlag != "" {
+		parts := strings.SplitN(*addCustomFlag, ":", 4)
+		if len(parts) < 2 {
+			fmt.Println("[!] Usage: --add-custom name:code[:type:os]")
+			return
+		}
+		name, code := parts[0], parts[1]
+		pType, osType := "custom", "linux"
+		if len(parts) > 2 {
+			pType = parts[2]
+		}
+		if len(parts) > 3 {
+			osType = parts[3]
+		}
+		if err := AddCustomPayload(name, code, pType, osType); err != nil {
+			fmt.Printf("[!] Error: %v\n", err)
+		} else {
+			fmt.Printf("[+] Custom payload '%s' saved!\n", name)
+		}
+		return
+	}
 
 	if *ipFlag == "auto" {
 		autoIP, err := DetectLocalIP()
@@ -182,7 +234,7 @@ func main() {
 		port = GetValidatedPort("Attacker Port")
 
 		// 3. Select Payload Type
-		payloads := GeneratePayloads(ip, port)
+		payloads := MergeCustomPayloads(GeneratePayloads(ip, port))
 		payloadNames := make([]string, len(payloads))
 		for i, p := range payloads {
 			payloadNames[i] = p.Name
@@ -211,13 +263,29 @@ func main() {
 	// 5. Generate and Print
 	finalPayload := selectedEncoder.Wrap(payloadCode)
 
+	// Save to History
+	SaveToHistory(HistoryEntry{
+		IP:      ip,
+		Port:    port,
+		Type:    selectedPayload.Name,
+		Encoder: selectedEncoder.Name,
+		Payload: finalPayload,
+	})
+
 	fmt.Printf("\n" + strings.Repeat("=", 60))
-	fmt.Printf("\n[+] Listener Command:\n    nc -lvnp %d\n", port)
+	fmt.Printf("\n[+] Listener Commands:\n%s\n", SuggestListeners(port))
 	fmt.Printf("\n[+] Finalized Payload (%s - %s):\n\n%s\n", selectedPayload.Name, selectedEncoder.Name, finalPayload)
-	fmt.Printf("\n" + strings.Repeat("=", 60) + "\n")
 
 	// Post-Generation Actions
-	options := []string{"Copy Payload to Clipboard", "Save as Template", "Exit"}
+	options := []string{
+		"Copy Payload to Clipboard",
+		"Save as Template",
+		"Show AV/EDR Bypass & Shell Upgrade Tips",
+		"Show HTTP Delivery Methods",
+		"Show C2 Framework Integration",
+		"Add Custom Payload",
+		"Exit",
+	}
 	choice := SelectOption("Post-Generation Actions", options)
 
 	switch choice {
@@ -241,6 +309,14 @@ func main() {
 		} else {
 			fmt.Println("[+] Template saved successfully!")
 		}
+	case 2:
+		PrintSuggestions(selectedPayload.Name, port)
+	case 3:
+		PrintDeliveryMethods(ip, port, finalPayload)
+	case 4:
+		PrintC2Integrations(ip, port)
+	case 5:
+		AddCustomPayloadInteractive()
 	}
 }
 
