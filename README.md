@@ -38,9 +38,15 @@
 <td width="50%">
 
 **🎛️ Listeners**
-- Multi-tool listener: `nc`, `socat`, `rlwrap`, `ncat`
-- Auto-detects available tools
-- Colorized listener command suggestions
+- **Built-in Go listener** (default, no external tools required)
+  - PTY-aware raw terminal via `golang.org/x/term`
+  - Arrow keys, Tab, Ctrl+C, Ctrl+Z pass through transparently
+  - Incoming data highlighted in cyan; SIGWINCH resize handling
+  - Multi-connection management with interactive switching menu
+  - `Ctrl+]` to suspend session and return to connection menu
+  - A proper `nc -lvnp` / ncat replacement — just `shellcraft listen 4444`
+- External tools still fully supported: `nc`, `socat`, `rlwrap`, `ncat`
+- Auto-detects available tools, colorized suggestions
 
 **💾 Persistence**
 - Payload history (last 20, with timestamps)
@@ -167,11 +173,25 @@ shellcraft -i auto -p 4444 -t powershell -e b64 --obfs 2 --suggest
 <details open>
 <summary><b>🎧 Listener</b></summary>
 
-```bash
-# Auto-detect available listener
-shellcraft listen 4444
+The default listener is the **built-in Go TCP listener** — a full-featured `nc -lvnp` replacement:
 
-# Specific listener type
+```bash
+# Built-in listener (default) — no external tools needed
+shellcraft listen 4444
+shellcraft listen -p 4444
+shellcraft listener --port 9001
+```
+
+Inside an interactive session:
+- **Remote output** is colored in cyan for visibility
+- **Arrow keys, Tab, Ctrl+C, Ctrl+Z** work naturally (raw PTY mode)
+- **Ctrl+]** suspends the session and returns to the connection menu
+- Type `exit` on the remote shell to close the connection automatically
+
+External tools are also fully supported for when you prefer them:
+
+```bash
+shellcraft listen 4444 nc
 shellcraft listen 4444 socat
 shellcraft listen 4444 rlwrap
 shellcraft listen 4444 ncat
@@ -224,7 +244,7 @@ After generating a payload interactively, the menu lets you:
 | 4 | Show HTTP delivery methods |
 | 5 | Show C2 framework integration |
 | 6 | Add a custom payload |
-| 7 | Start listener (TTY-aware) -- pick from available tools |
+| 7 | Start listener (built-in Go listener, defaults to PTY raw mode) |
 | 8 | Exit |
 
 ---
