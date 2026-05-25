@@ -40,7 +40,7 @@ func GetListeners() []ListenerType {
 
 func handleListen(args []string) {
 	if len(args) < 1 {
-		fmt.Println("[!] Usage: shellcraft listen <port> [listener-type]")
+		fmt.Printf("%s\n", errorf("Usage: shellcraft listen <port> [listener-type]"))
 		fmt.Println("    Listener types: nc, socat, rlwrap, ncat")
 		return
 	}
@@ -61,14 +61,13 @@ func handleListen(args []string) {
 	}
 
 	if selected == nil {
-		fmt.Printf("[!] Unknown listener type '%s'. Available: nc, socat, rlwrap, ncat\n", listenerName)
+		fmt.Printf("%s\n", errorf("Unknown listener type '%s'. Available: nc, socat, rlwrap, ncat", listenerName))
 		return
 	}
 
 	cmdStr := fmt.Sprintf(selected.Command, port)
-	fmt.Printf("[*] Starting %s listener on port %s...\n", selected.Name, port)
-	fmt.Printf("[*] Command: %s\n", cmdStr)
-	fmt.Println(strings.Repeat("-", 50))
+	fmt.Printf("%s\n", infof("Starting %s listener on port %s...", selected.Name, port))
+	fmt.Printf("%s\n", col(cmdStr, Cyan))
 
 	parts := strings.Fields(cmdStr)
 	cmd := exec.Command(parts[0], parts[1:]...)
@@ -76,7 +75,7 @@ func handleListen(args []string) {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
-		fmt.Printf("[!] Error running %s: %v\n", selected.Name, err)
+		fmt.Printf("%s\n", errorf("Error running %s: %v", selected.Name, err))
 	}
 }
 
@@ -85,10 +84,10 @@ func SuggestListeners(port int) string {
 	var suggestions []string
 	for _, l := range GetListeners() {
 		if l.Detect() {
-			suggestions = append(suggestions, fmt.Sprintf("  %s", fmt.Sprintf(l.Command, portStr)))
+			suggestions = append(suggestions, col(fmt.Sprintf("  %s", fmt.Sprintf(l.Command, portStr)), Cyan))
 		}
 	}
-	suggestions = append(suggestions, fmt.Sprintf("  nc -lvnp %s", portStr))
+	suggestions = append(suggestions, col(fmt.Sprintf("  nc -lvnp %s", portStr), Cyan))
 	return strings.Join(suggestions, "\n")
 }
 
@@ -108,26 +107,26 @@ func PickListenerAndStart(port int) {
 
 	idx := SelectOption("Select Listener Type (TTY-aware if available)", names)
 	if idx >= len(names)-1 {
-		fmt.Println("[*] Listener cancelled.")
+		fmt.Printf("%s\n", infof("Listener cancelled."))
 		return
 	}
 
 	listener := available[idx]
 	cmdStr := fmt.Sprintf(listener.Command, portStr)
-	fmt.Printf("[*] Command: %s\n", cmdStr)
+	fmt.Printf("%s\n", col(cmdStr, Cyan))
 	confirm := GetInput("Start this listener? (y/n)")
 	if strings.ToLower(confirm) != "y" && strings.ToLower(confirm) != "yes" {
-		fmt.Println("[*] Listener cancelled.")
+		fmt.Printf("%s\n", infof("Listener cancelled."))
 		return
 	}
 
-	fmt.Printf("[*] Starting %s listener on port %s...\n", listener.Name, portStr)
+	fmt.Printf("%s\n", infof("Starting %s listener on port %s...", listener.Name, portStr))
 	parts := strings.Fields(cmdStr)
 	cmd := exec.Command(parts[0], parts[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
-		fmt.Printf("[!] Error running %s: %v\n", listener.Name, err)
+		fmt.Printf("%s\n", errorf("Error running %s: %v", listener.Name, err))
 	}
 }
