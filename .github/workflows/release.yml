@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,13 +30,23 @@ jobs:
 
       - name: Build
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
           BINARY_NAME=shellcraft-${{ matrix.goos }}-${{ matrix.goarch }}
           if [ "${{ matrix.goos }}" = "windows" ]; then
             BINARY_NAME=${BINARY_NAME}.exe
           fi
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
           go build -ldflags "-X main.Version=${VERSION}" -o dist/${BINARY_NAME} ./cmd/shellcraft
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: shellcraft-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
 
       - name: Release
         uses: softprops/action-gh-release@v2
