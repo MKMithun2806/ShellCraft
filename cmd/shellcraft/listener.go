@@ -91,3 +91,43 @@ func SuggestListeners(port int) string {
 	suggestions = append(suggestions, fmt.Sprintf("  nc -lvnp %s", portStr))
 	return strings.Join(suggestions, "\n")
 }
+
+func PickListenerAndStart(port int) {
+	portStr := fmt.Sprintf("%d", port)
+	available := GetListeners()
+	var names []string
+	for _, l := range available {
+		if l.Detect() {
+			names = append(names, l.Name)
+		}
+	}
+	if len(names) == 0 {
+		names = append(names, "nc -lvnp PORT (default fallback)")
+	}
+	names = append(names, "Cancel")
+
+	idx := SelectOption("Select Listener Type (TTY-aware if available)", names)
+	if idx >= len(names)-1 {
+		fmt.Println("[*] Listener cancelled.")
+		return
+	}
+
+	listener := available[idx]
+	cmdStr := fmt.Sprintf(listener.Command, portStr)
+	fmt.Printf("[*] Command: %s\n", cmdStr)
+	confirm := GetInput("Start this listener? (y/n)")
+	if strings.ToLower(confirm) != "y" && strings.ToLower(confirm) != "yes" {
+		fmt.Println("[*] Listener cancelled.")
+		return
+	}
+
+	fmt.Printf("[*] Starting %s listener on port %s...\n", listener.Name, portStr)
+	parts := strings.Fields(cmdStr)
+	cmd := exec.Command(parts[0], parts[1:]...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("[!] Error running %s: %v\n", listener.Name, err)
+	}
+}

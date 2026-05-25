@@ -284,6 +284,7 @@ func main() {
 		"Show HTTP Delivery Methods",
 		"Show C2 Framework Integration",
 		"Add Custom Payload",
+		"Start Listener (TTY-aware)",
 		"Exit",
 	}
 	choice := SelectOption("Post-Generation Actions", options)
@@ -321,6 +322,8 @@ func main() {
 		PrintC2Integrations(ip, port)
 	case 5:
 		AddCustomPayloadInteractive()
+	case 6:
+		PickListenerAndStart(port)
 	}
 }
 
