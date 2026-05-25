@@ -36,12 +36,15 @@ jobs:
       - name: Build
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
+            RAW_VERSION=${GITHUB_REF#refs/tags/}
           elif [[ -n "${{ inputs.tag_name }}" ]]; then
-            VERSION=${{ inputs.tag_name }}
+            RAW_VERSION=${{ inputs.tag_name }}
           else
-            VERSION=$(git rev-parse --short HEAD)
+            RAW_VERSION=$(git rev-parse --short HEAD)
           fi
+          # Strip leading 'v' so main.Version stores e.g. "1.0.0"
+          # (the banner format string adds the "v" prefix itself)
+          VERSION="${RAW_VERSION#v}"
           BINARY_NAME=shellcraft-${{ matrix.goos }}-${{ matrix.goarch }}
           if [ "${{ matrix.goos }}" = "windows" ]; then
             BINARY_NAME=${BINARY_NAME}.exe
