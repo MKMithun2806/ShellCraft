@@ -291,7 +291,11 @@ func main() {
 	switch choice {
 	case 0:
 		if err := copyToClipboard(finalPayload); err != nil {
-			fmt.Printf("[!] Failed to copy to clipboard: %v\n", err)
+			fmt.Printf("[!] Clipboard copy failed: %v\n", err)
+			outPath := "payload.txt"
+			if writeErr := os.WriteFile(outPath, []byte(finalPayload), 0644); writeErr == nil {
+				fmt.Printf("[+] Payload written to %s instead.\n", outPath)
+			}
 		} else {
 			fmt.Println("[+] Payload copied to clipboard!")
 		}
