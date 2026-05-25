@@ -21,7 +21,26 @@ ShellCraft is a standalone, interactive CLI tool written in Go for generating lo
 
 Ensure you have Go installed on your system.
 
-1. Clone the repository or download the source code.
+### Option 1: Quick Install (via script)
+
+Run the following command to download and run the installer:
+```bash
+curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/install.sh | bash
+```
+
+### Option 2: Using go install
+
+```bash
+go install github.com/MKMithun2806/ShellCraft@latest
+```
+
+### Option 3: Manual Build
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/MKMithun2806/ShellCraft.git
+   cd ShellCraft
+   ```
 2. Build the binary:
    ```bash
    go build -o shellcraft src/*.go
