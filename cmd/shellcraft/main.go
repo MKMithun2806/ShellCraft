@@ -23,7 +23,7 @@ const banner = `
 func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
-		case "listen":
+		case "listen", "listener":
 			handleListen(os.Args[2:])
 			return
 		case "history":
