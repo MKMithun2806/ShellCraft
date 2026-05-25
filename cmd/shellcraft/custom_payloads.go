@@ -73,9 +73,9 @@ func AddCustomPayloadInteractive() {
 	})
 
 	if err := SaveCustomPayloads(payloads); err != nil {
-		fmt.Printf("[!] Error saving custom payload: %v\n", err)
+		fmt.Printf("%s\n", errorf("Error saving custom payload: %v", err))
 	} else {
-		fmt.Printf("[+] Custom payload '%s' saved!\n", name)
+		fmt.Printf("%s\n", successf("Custom payload '%s' saved!", name))
 	}
 }
 
@@ -107,14 +107,14 @@ func MergeCustomPayloads(base []Payload) []Payload {
 func ListCustomPayloads() {
 	payloads, err := LoadCustomPayloads()
 	if err != nil {
-		fmt.Printf("[!] Error loading custom payloads: %v\n", err)
+		fmt.Printf("%s\n", errorf("Error loading custom payloads: %v", err))
 		return
 	}
 	if len(payloads) == 0 {
-		fmt.Println("[!] No custom payloads found.")
+		fmt.Printf("%s\n", errorf("No custom payloads found."))
 		return
 	}
-	fmt.Println("\n--- Custom Payloads ---")
+	fmt.Printf("\n%s\n", headerf("Custom Payloads"))
 	for i, p := range payloads {
 		fmt.Printf("[%d] %-20s | Type: %s | OS: %s\n", i+1, p.Name, p.Type, p.OSType)
 	}

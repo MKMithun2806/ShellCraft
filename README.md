@@ -220,11 +220,12 @@ After generating a payload interactively, the menu lets you:
 |---|--------|
 | 1 | Copy payload to clipboard |
 | 2 | Save as template |
-| 3 | how AV/EDR bypass & shell upgrade tips |
+| 3 | Show AV/EDR bypass & shell upgrade tips |
 | 4 | Show HTTP delivery methods |
-| 5 | how C2 framework integration |
+| 5 | Show C2 framework integration |
 | 6 | Add a custom payload |
-| 7 | Exit |
+| 7 | Start listener (TTY-aware) -- pick from available tools |
+| 8 | Exit |
 
 ---
 

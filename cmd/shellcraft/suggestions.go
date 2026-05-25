@@ -96,23 +96,23 @@ func PrintSuggestions(pType string, port int) {
 	tips := GetAVBypassSuggestions(pType)
 	upgrades := GetShellUpgradeSuggestions()
 
-	fmt.Println(strings.Repeat("=", 60))
-	fmt.Println("[+] AV/EDR Bypass Suggestions:")
-	fmt.Println(strings.Repeat("-", 60))
+	fmt.Println(headerf(strings.Repeat("=", 60)))
+	fmt.Println(headerf("AV/EDR Bypass Suggestions:"))
+	fmt.Println(col(strings.Repeat("-", 60), Cyan))
 	for _, t := range tips {
-		fmt.Printf("  * %s:\n    %s\n\n", t.Title, t.Content)
+		fmt.Printf("  * %s:\n    %s\n\n", Bold+t.Title+Reset, t.Content)
 	}
 
-	fmt.Println(strings.Repeat("=", 60))
-	fmt.Println("[+] Shell Upgrade Commands:")
-	fmt.Println(strings.Repeat("-", 60))
+	fmt.Println(headerf(strings.Repeat("=", 60)))
+	fmt.Println(headerf("Shell Upgrade Commands:"))
+	fmt.Println(col(strings.Repeat("-", 60), Cyan))
 	for _, u := range upgrades {
-		fmt.Printf("  * %s:\n    %s\n\n", u.Title, u.Content)
+		fmt.Printf("  * %s:\n    %s\n\n", Bold+u.Title+Reset, u.Content)
 	}
 
-	fmt.Println(strings.Repeat("=", 60))
-	fmt.Println("[+] Listener Commands:")
-	fmt.Println(strings.Repeat("-", 60))
-	fmt.Println(SuggestListeners(port))
+	fmt.Println(headerf(strings.Repeat("=", 60)))
+	fmt.Println(headerf("Listener Commands:"))
+	fmt.Println(col(strings.Repeat("-", 60), Cyan))
+	fmt.Println(col(SuggestListeners(port), Cyan))
 	fmt.Println()
 }

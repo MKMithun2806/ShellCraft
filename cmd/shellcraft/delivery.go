@@ -43,10 +43,11 @@ func GetDeliveryMethods(ip string, port int, payload string) []DeliveryMethod {
 }
 
 func PrintDeliveryMethods(ip string, port int, payload string) {
-	fmt.Println("\n" + "=" + strings.Repeat("=", 59))
-	fmt.Println("[+] Web / HTTP Delivery Commands:")
-	fmt.Println("-" + strings.Repeat("-", 59))
+	fmt.Println()
+	fmt.Println(headerf(strings.Repeat("=", 60)))
+	fmt.Println(headerf("Web / HTTP Delivery Commands:"))
+	fmt.Println(col(strings.Repeat("-", 60), Cyan))
 	for _, d := range GetDeliveryMethods(ip, port, payload) {
-		fmt.Printf("  * %s:\n    %s\n\n", d.Name, d.Command)
+		fmt.Printf("  * %s:\n    %s\n\n", Bold+d.Name+Reset, col(d.Command, Cyan))
 	}
 }

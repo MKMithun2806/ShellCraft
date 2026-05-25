@@ -67,16 +67,16 @@ func main() {
 	}
 	if *deleteCustomFlag >= 0 {
 		if err := DeleteCustomPayload(*deleteCustomFlag - 1); err != nil {
-			fmt.Printf("[!] Error deleting custom payload: %v\n", err)
+			fmt.Printf("%s\n", errorf("Error deleting custom payload: %v", err))
 		} else {
-			fmt.Println("[+] Custom payload deleted.")
+			fmt.Printf("%s\n", successf("Custom payload deleted."))
 		}
 		return
 	}
 	if *addCustomFlag != "" {
 		parts := strings.SplitN(*addCustomFlag, ":", 4)
 		if len(parts) < 2 {
-			fmt.Println("[!] Usage: --add-custom name:code[:type:os]")
+			fmt.Printf("%s\n", errorf("Usage: --add-custom name:code[:type:os]"))
 			return
 		}
 		name, code := parts[0], parts[1]
@@ -88,9 +88,9 @@ func main() {
 			osType = parts[3]
 		}
 		if err := AddCustomPayload(name, code, pType, osType); err != nil {
-			fmt.Printf("[!] Error: %v\n", err)
+			fmt.Printf("%s\n", errorf("Error: %v", err))
 		} else {
-			fmt.Printf("[+] Custom payload '%s' saved!\n", name)
+			fmt.Printf("%s\n", successf("Custom payload '%s' saved!", name))
 		}
 		return
 	}
@@ -98,10 +98,10 @@ func main() {
 	if *ipFlag == "auto" {
 		autoIP, err := DetectLocalIP()
 		if err != nil {
-			fmt.Printf("[!] IP Detection failed: %v\n", err)
+			fmt.Printf("%s\n", errorf("IP Detection failed: %v", err))
 			os.Exit(1)
 		}
-		fmt.Printf("[*] Auto-detected IP: %s\n", autoIP)
+		fmt.Printf("%s\n", infof("Auto-detected IP: %s", autoIP))
 		*ipFlag = autoIP
 	}
 
@@ -109,14 +109,14 @@ func main() {
 	if *listFlag {
 		templates, err := ListTemplates()
 		if err != nil {
-			fmt.Printf("[!] Error loading templates: %v\n", err)
+			fmt.Printf("%s\n", errorf("Error loading templates: %v", err))
 			return
 		}
 		if len(templates) == 0 {
-			fmt.Println("[!] No templates found.")
+			fmt.Printf("%s\n", errorf("No templates found."))
 			return
 		}
-		fmt.Println("\n--- Saved Templates ---")
+		fmt.Printf("\n%s\n", headerf("Saved Templates"))
 		for _, t := range templates {
 			fmt.Printf("- %-15s (%s:%d | %s | %s)\n", t.Name, t.IP, t.Port, t.Type, t.Encoder)
 		}
@@ -127,7 +127,7 @@ func main() {
 	if *loadFlag != "" {
 		templates, err := ListTemplates()
 		if err != nil {
-			fmt.Printf("[!] Error loading templates: %v\n", err)
+			fmt.Printf("%s\n", errorf("Error loading templates: %v", err))
 			return
 		}
 		var found *Template
@@ -138,7 +138,7 @@ func main() {
 			}
 		}
 		if found == nil {
-			fmt.Printf("[!] Template '%s' not found.\n", *loadFlag)
+			fmt.Printf("%s\n", errorf("Template '%s' not found.", *loadFlag))
 			return
 		}
 		handleNonInteractive(found.IP, found.Port, found.Type, found.Encoder, *obfsFlag)
@@ -156,9 +156,9 @@ func main() {
 				Encoder: *encFlag,
 			})
 			if err != nil {
-				fmt.Printf("[!] Error saving template: %v\n", err)
+				fmt.Printf("%s\n", errorf("Error saving template: %v", err))
 			} else {
-				fmt.Printf("[+] Template '%s' saved!\n", *saveFlag)
+				fmt.Printf("%s\n", successf("Template '%s' saved!", *saveFlag))
 			}
 		}
 		handleNonInteractive(*ipFlag, *portFlag, *typeFlag, *encFlag, *obfsFlag)
@@ -170,12 +170,12 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-sigChan
-		fmt.Println("\n\n[!] Exiting gracefully...")
+		fmt.Printf("\n\n%s\n", infof("Exiting gracefully..."))
 		os.Exit(0)
 	}()
 
-	fmt.Print(banner)
-	fmt.Printf("      Version: %s\n", Version)
+	fmt.Print(col(banner, Yellow))
+	fmt.Printf("      %s\n", col("Version: " + Version, Yellow))
 
 	var ip string
 	var port int
@@ -185,10 +185,10 @@ func main() {
 	// Template Selection
 	templates, err := ListTemplates()
 	if err != nil {
-		fmt.Printf("[!] Warning: Could not load templates: %v\n", err)
+		fmt.Printf("%s\n", infof("Warning: Could not load templates: %v", err))
 	}
 	if len(templates) > 0 {
-		fmt.Println("[*] Saved Templates found.")
+		fmt.Printf("%s\n", infof("Saved Templates found."))
 		options := []string{"Use a Template", "Continue without Template"}
 		if SelectOption("Template Menu", options) == 0 {
 			tNames := make([]string, len(templates))
@@ -217,7 +217,7 @@ func main() {
 					break
 				}
 			}
-			fmt.Printf("[+] Loaded Template: %s\n", t.Name)
+			fmt.Printf("%s\n", successf("Loaded Template: %s", t.Name))
 		}
 	}
 
@@ -227,7 +227,7 @@ func main() {
 		if ip == "auto" {
 			autoIP, _ := DetectLocalIP()
 			ip = autoIP
-			fmt.Printf("[*] Auto-detected IP: %s\n", ip)
+			fmt.Printf("%s\n", infof("Auto-detected IP: %s", ip))
 		}
 
 		// 2. Get Attacker Port
@@ -272,9 +272,11 @@ func main() {
 		Payload: finalPayload,
 	})
 
-	fmt.Printf("\n" + strings.Repeat("=", 60))
-	fmt.Printf("\n[+] Listener Commands:\n%s\n", SuggestListeners(port))
-	fmt.Printf("\n[+] Finalized Payload (%s - %s):\n\n%s\n", selectedPayload.Name, selectedEncoder.Name, finalPayload)
+	fmt.Printf("\n%s\n", headerf(strings.Repeat("=", 60)))
+	fmt.Printf("\n%s\n", headerf("Listener Commands:"))
+	fmt.Printf("%s\n", SuggestListeners(port))
+	fmt.Printf("\n%s\n", headerf("Finalized Payload (%s - %s):", selectedPayload.Name, selectedEncoder.Name))
+	fmt.Printf("%s\n\n", payloadf("%s", finalPayload))
 
 	// Post-Generation Actions
 	options := []string{
@@ -284,6 +286,7 @@ func main() {
 		"Show HTTP Delivery Methods",
 		"Show C2 Framework Integration",
 		"Add Custom Payload",
+		"Start Listener (TTY-aware)",
 		"Exit",
 	}
 	choice := SelectOption("Post-Generation Actions", options)
@@ -291,13 +294,13 @@ func main() {
 	switch choice {
 	case 0:
 		if err := copyToClipboard(finalPayload); err != nil {
-			fmt.Printf("[!] Clipboard copy failed: %v\n", err)
+			fmt.Printf("%s\n", errorf("Clipboard copy failed: %v", err))
 			outPath := "payload.txt"
 			if writeErr := os.WriteFile(outPath, []byte(finalPayload), 0644); writeErr == nil {
-				fmt.Printf("[+] Payload written to %s instead.\n", outPath)
+				fmt.Printf("%s\n", successf("Payload written to %s instead.", outPath))
 			}
 		} else {
-			fmt.Println("[+] Payload copied to clipboard!")
+			fmt.Printf("%s\n", successf("Payload copied to clipboard!"))
 		}
 	case 1:
 		name := GetInput("Enter Template Name")
@@ -309,9 +312,9 @@ func main() {
 			Encoder: selectedEncoder.Name,
 		})
 		if err != nil {
-			fmt.Printf("[!] Error saving template: %v\n", err)
+			fmt.Printf("%s\n", errorf("Error saving template: %v", err))
 		} else {
-			fmt.Println("[+] Template saved successfully!")
+			fmt.Printf("%s\n", successf("Template saved successfully!"))
 		}
 	case 2:
 		PrintSuggestions(selectedPayload.Name, port)
@@ -321,6 +324,8 @@ func main() {
 		PrintC2Integrations(ip, port)
 	case 5:
 		AddCustomPayloadInteractive()
+	case 6:
+		PickListenerAndStart(port)
 	}
 }
 

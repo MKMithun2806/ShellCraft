@@ -48,10 +48,11 @@ func GetC2Integrations(ip string, port int) []C2Framework {
 }
 
 func PrintC2Integrations(ip string, port int) {
-	fmt.Println("\n" + "=" + strings.Repeat("=", 59))
-	fmt.Println("[+] C2 Framework Integration:")
-	fmt.Println("-" + strings.Repeat("-", 59))
+	fmt.Println()
+	fmt.Println(headerf(strings.Repeat("=", 60)))
+	fmt.Println(headerf("C2 Framework Integration:"))
+	fmt.Println(col(strings.Repeat("-", 60), Cyan))
 	for _, c := range GetC2Integrations(ip, port) {
-		fmt.Printf("  * %s (%s):\n    %s\n\n", c.Name, c.Protocol, c.Stager)
+		fmt.Printf("  * %s (%s):\n    %s\n\n", Bold+c.Name+Reset, c.Protocol, col(c.Stager, Cyan))
 	}
 }
