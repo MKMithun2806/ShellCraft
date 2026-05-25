@@ -44,7 +44,7 @@ curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/install
 ### Option 2: Using go install
 
 ```bash
-go install github.com/MKMithun2806/ShellCraft/src@latest
+go install github.com/MKMithun2806/ShellCraft/@latest
 ```
 
 ### Option 3: Manual Build
