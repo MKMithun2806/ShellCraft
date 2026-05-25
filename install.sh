@@ -12,7 +12,7 @@ fi
 
 # Install from GitHub - fixed path to src
 echo "[*] Running: go install github.com/MKMithun2806/ShellCraft/src@latest"
-go install github.com/MKMithun2806/ShellCraft/src@latest
+go install github.com/MKMithun2806/ShellCraft/@latest
 
 # The binary name will be 'src' because of the path, we should rename it to 'shellcraft' 
 # or use a different install method. Actually, better to use the local build if in repo, 
