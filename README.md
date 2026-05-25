@@ -247,15 +247,6 @@ After generating a payload interactively, the menu lets you:
 
 ---
 
-## 🤖 CI/CD
-
-Releases are built automatically via GitHub Actions:
-
-- **On tag push** (`v*`): builds for `linux`/`windows`/`macos` × `amd64`/`arm64` → creates a GitHub Release
-- **Manual trigger**: go to **Actions → Release → "Run workflow"** — optionally provide a `tag_name` to also create a release
-
----
-
 ## 🗑️ Uninstall
 
 ```bash
