@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐚 ShellCraft
+# ShellCraft
 
 **Reverse shell payload generator — interactive, obfuscated, ready to go.**
 
@@ -20,14 +20,14 @@
 <tr>
 <td width="50%">
 
-**🚀 Generation**
+**Generation**
 - Interactive guided workflow & CLI one-liners
 - Auto IP detection (`-i auto`)
 - 10+ payload types across Linux, Windows, macOS
 - Obfuscation engine (Levels 1–3) for PowerShell & Python
 - Encoding wrappers: Raw, URL, Base64
 
-**🎯 Post-Generation**
+**Post-Generation**
 - AV/EDR bypass suggestions per payload type
 - Shell upgrade commands (PTY, socat, stty)
 - HTTP delivery methods (curl, wget, IEX, certutil)
@@ -180,7 +180,7 @@ shellcraft listen 4444 ncat
 </details>
 
 <details>
-<summary><b>📜 Payload history</b></summary>
+<summary><b>Payload history</b></summary>
 
 ```bash
 shellcraft history
@@ -191,7 +191,7 @@ Shows the last 20 generated payloads with timestamps, IP, port, type, and encode
 </details>
 
 <details>
-<summary><b>🧩 Custom payloads</b></summary>
+<summary><b>Custom payloads</b></summary>
 
 ```bash
 shellcraft custom-payload list
@@ -218,13 +218,13 @@ After generating a payload interactively, the menu lets you:
 
 | # | Action |
 |---|--------|
-| 1 | 📋 Copy payload to clipboard |
-| 2 | 💾 Save as template |
-| 3 | 🛡️ Show AV/EDR bypass & shell upgrade tips |
-| 4 | 🌐 Show HTTP delivery methods |
-| 5 | 🏗️ Show C2 framework integration |
-| 6 | ➕ Add a custom payload |
-| 7 | 🚪 Exit |
+| 1 | Copy payload to clipboard |
+| 2 | Save as template |
+| 3 | how AV/EDR bypass & shell upgrade tips |
+| 4 | Show HTTP delivery methods |
+| 5 | how C2 framework integration |
+| 6 | Add a custom payload |
+| 7 | Exit |
 
 ---
 
