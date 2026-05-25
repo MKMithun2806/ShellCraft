@@ -42,7 +42,7 @@ curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/install
 ### Option 3: Using go install
 
 ```bash
-go install github.com/MKMithun2806/ShellCraft@latest
+go install github.com/MKMithun2806/ShellCraft/cmd/shellcraft@latest
 ```
 
 ### Option 4: Manual Build
@@ -71,11 +71,16 @@ Generate payloads instantly using CLI flags:
 shellcraft -i 10.10.10.10 -p 4444 -t python -e base64
 ```
 
-**Flags:**
+**Generation Flags:**
 - `-i`: Attacker IP
 - `-p`: Attacker Port
 - `-t`: Payload Type (bash, nc, ps, zsh, python, php, ruby, perl)
-- `-e`: Encoding (raw, url, base64)
+- `-e`: Encoding (raw, url, b64)
+
+**Template Management Flags:**
+- `-list`: List all saved templates.
+- `-load <name>`: Load and run a saved template.
+- `-save <name>`: Save the current CLI flags as a template.
 
 ### Listener Helper
 Quickly start a netcat listener:

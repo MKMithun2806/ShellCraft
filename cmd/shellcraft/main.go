@@ -36,10 +36,60 @@ func main() {
 	portFlag := flag.Int("p", 0, "Attacker Port")
 	typeFlag := flag.String("t", "", "Payload Type (bash, nc, ps, zsh, python, php, ruby, perl)")
 	encFlag := flag.String("e", "raw", "Encoding (raw, url, b64)")
+	
+	listFlag := flag.Bool("list", false, "List all saved templates")
+	loadFlag := flag.String("load", "", "Load and run a saved template")
+	saveFlag := flag.String("save", "", "Save current CLI config as a template")
 	flag.Parse()
 
-	// Non-interactive mode
+	// 1. Handle Template Listing
+	if *listFlag {
+		templates, _ := ListTemplates()
+		if len(templates) == 0 {
+			fmt.Println("[!] No templates found.")
+			return
+		}
+		fmt.Println("\n--- Saved Templates ---")
+		for _, t := range templates {
+			fmt.Printf("- %-15s (%s:%d | %s | %s)\n", t.Name, t.IP, t.Port, t.Type, t.Encoder)
+		}
+		return
+	}
+
+	// 2. Handle Template Loading (Non-interactive)
+	if *loadFlag != "" {
+		templates, _ := ListTemplates()
+		var found *Template
+		for _, t := range templates {
+			if strings.EqualFold(t.Name, *loadFlag) {
+				found = &t
+				break
+			}
+		}
+		if found == nil {
+			fmt.Printf("[!] Template '%s' not found.\n", *loadFlag)
+			return
+		}
+		handleNonInteractive(found.IP, found.Port, found.Type, found.Encoder)
+		return
+	}
+
+	// 3. Handle Non-interactive Mode (Direct Flags)
 	if *ipFlag != "" && *portFlag != 0 && *typeFlag != "" {
+		if *saveFlag != "" {
+			err := SaveTemplate(Template{
+				Name:    *saveFlag,
+				IP:      *ipFlag,
+				Port:    *portFlag,
+				Type:    *typeFlag,
+				Encoder: *encFlag,
+			})
+			if err != nil {
+				fmt.Printf("[!] Error saving template: %v\n", err)
+			} else {
+				fmt.Printf("[+] Template '%s' saved!\n", *saveFlag)
+			}
+		}
 		handleNonInteractive(*ipFlag, *portFlag, *typeFlag, *encFlag)
 		return
 	}

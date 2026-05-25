@@ -11,9 +11,8 @@ if ! command -v go >/dev/null 2>&1; then
 fi
 
 # Clean install from GitHub using standard Go layout
-# The binary name will automatically be 'shellcraft' because it's in cmd/shellcraft
-echo "[*] Running: go install github.com/MKMithun2806/ShellCraft@latest"
-go install github.com/MKMithun2806/ShellCraft@latest
+echo "[*] Running: go install github.com/MKMithun2806/ShellCraft/cmd/shellcraft@latest"
+go install github.com/MKMithun2806/ShellCraft/cmd/shellcraft@latest
 
 # Determine GOBIN
 GOBIN=$(go env GOBIN)
