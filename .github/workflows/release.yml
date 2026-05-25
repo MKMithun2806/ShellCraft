@@ -39,7 +39,7 @@ jobs:
             BINARY_NAME=${BINARY_NAME}.exe
           fi
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-          go build -ldflags "-X main.Version=${VERSION}" -o dist/${BINARY_NAME} src/*.go
+          go build -ldflags "-X main.Version=${VERSION}" -o dist/${BINARY_NAME} ./cmd/shellcraft
 
       - name: Release
         uses: softprops/action-gh-release@v2

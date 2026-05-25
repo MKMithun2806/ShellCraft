@@ -44,7 +44,7 @@ curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/install
 ### Option 2: Using go install
 
 ```bash
-go install github.com/MKMithun2806/ShellCraft/@latest
+go install github.com/MKMithun2806/ShellCraft@latest
 ```
 
 ### Option 3: Manual Build
@@ -56,8 +56,9 @@ go install github.com/MKMithun2806/ShellCraft/@latest
    ```
 2. Build the binary:
    ```bash
-   go build -ldflags "-X main.Version=1.0.0" -o shellcraft src/*.go
+   go build -ldflags "-X main.Version=1.0.0" -o shellcraft ./cmd/shellcraft
    ```
+
 
 ## Usage
 
