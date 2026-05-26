@@ -268,7 +268,7 @@ After generating a payload interactively, the menu lets you:
 
 ---
 
-## 🗑️ Uninstall
+## 🗑️ Uninstalll Script (Removes EVERYTHING shellcraft)
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/MKMithun2806/ShellCraft/main/uninstall.sh | bash
