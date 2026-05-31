@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"os/signal"
@@ -25,7 +24,6 @@ const (
 	Green  = "\033[32m"
 	Yellow = "\033[33m"
 	Blue   = "\033[34m"
-	Cyan   = "\033[36m"
 	Bold   = "\033[1m"
 	Reset  = "\033[0m"
 )
@@ -52,10 +50,6 @@ func headerf(format string, a ...interface{}) string {
 
 func dimf(format string, a ...interface{}) string {
 	return col(fmt.Sprintf(format, a...), "\033[90m")
-}
-
-func cyanf(format string, a ...interface{}) string {
-	return col(fmt.Sprintf(format, a...), Cyan)
 }
 
 // ─── Connection metadata ──────────────────────────────────────────────────────
@@ -239,7 +233,6 @@ func (s *Server) interact(id int) {
 	s.active = id
 	fmt.Printf("\n%s\n", headerf("Connected to %s [%d]", meta.addr, id))
 	fmt.Printf("  %s\n", infof("Remote shell ready — all input is forwarded transparently"))
-	fmt.Printf("  %s\n", cyanf("Incoming data shown in cyan"))
 	fmt.Printf("  %s\n", dimf("Ctrl+] to return to menu  |  Ctrl+C sends SIGINT to remote"))
 	fmt.Printf("  %s\n", dimf("Arrow keys, Tab, Ctrl+Z all work — raw PTY mode"))
 	fmt.Println(dimf(strings.Repeat("─", 60)))
@@ -265,19 +258,20 @@ func (s *Server) interactRaw(meta *connMeta, oldState *term.State) {
 	}
 
 	done := make(chan struct{})
+	var closeOnce sync.Once
+	signalDone := func() { closeOnce.Do(func() { close(done) }) }
 
-	// Connection → stdout (colored in cyan)
+	// Connection → stdout (transparent pass-through — no color wrappers
+	// so remote shell escape sequences and prompts are not corrupted)
 	go func() {
+		defer signalDone()
 		buf := make([]byte, 4096)
 		for {
 			n, err := meta.conn.Read(buf)
 			if n > 0 {
-				os.Stdout.WriteString(Cyan)
 				os.Stdout.Write(buf[:n])
-				os.Stdout.WriteString(Reset)
 			}
 			if err != nil {
-				close(done)
 				return
 			}
 		}
@@ -285,6 +279,17 @@ func (s *Server) interactRaw(meta *connMeta, oldState *term.State) {
 
 	// Stdin → connection (with escape detection: Ctrl+])
 	go func() {
+		defer signalDone()
+		// Close the TCP conn on escape so the remote goroutine unblocks
+		connClosed := false
+		closeConn := func() {
+			if !connClosed {
+				connClosed = true
+				meta.conn.Close()
+			}
+		}
+		defer closeConn()
+
 		buf := make([]byte, 4096)
 		for {
 			n, err := os.Stdin.Read(buf)
@@ -296,13 +301,11 @@ func (s *Server) interactRaw(meta *connMeta, oldState *term.State) {
 					if idx > 0 {
 						meta.conn.Write(data[:idx])
 					}
-					close(done)
 					return
 				}
 				meta.conn.Write(data)
 			}
 			if err != nil {
-				close(done)
 				return
 			}
 		}
@@ -320,10 +323,13 @@ func (s *Server) interactRaw(meta *connMeta, oldState *term.State) {
 
 // interactLine is a plain line-oriented mode fallback when PTY is unavailable.
 func (s *Server) interactLine(meta *connMeta) {
-	errCh := make(chan error, 2)
+	done := make(chan struct{})
+	var closeOnce sync.Once
+	signalDone := func() { closeOnce.Do(func() { close(done) }) }
 
 	// Connection → stdout
 	go func() {
+		defer signalDone()
 		buf := make([]byte, 4096)
 		for {
 			n, err := meta.conn.Read(buf)
@@ -331,7 +337,6 @@ func (s *Server) interactLine(meta *connMeta) {
 				os.Stdout.Write(buf[:n])
 			}
 			if err != nil {
-				errCh <- err
 				return
 			}
 		}
@@ -339,24 +344,20 @@ func (s *Server) interactLine(meta *connMeta) {
 
 	// Stdin → connection (line by line, check for exit/quit)
 	go func() {
+		defer signalDone()
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			line := scanner.Text()
 			trimmed := strings.TrimSpace(line)
 			if trimmed == "exit" || trimmed == "quit" {
 				meta.conn.Write([]byte(line + "\n"))
-				errCh <- io.EOF
 				return
 			}
 			meta.conn.Write([]byte(line + "\n"))
 		}
-		if err := scanner.Err(); err != nil {
-			errCh <- err
-		}
-		errCh <- io.EOF
 	}()
 
-	<-errCh
+	<-done
 
 	fmt.Printf("\n%s\n", dimf("Connection #%d session ended", meta.id))
 }

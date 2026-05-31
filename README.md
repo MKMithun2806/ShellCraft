@@ -41,7 +41,7 @@
 - **Built-in Go listener** (default, no external tools required)
   - PTY-aware raw terminal via `golang.org/x/term`
   - Arrow keys, Tab, Ctrl+C, Ctrl+Z pass through transparently
-  - Incoming data highlighted in cyan; SIGWINCH resize handling
+  - SIGWINCH resize handling
   - Multi-connection management with interactive switching menu
   - `Ctrl+]` to suspend session and return to connection menu
   - A proper `nc -lvnp` / ncat replacement — just `shellcraft listen 4444`
