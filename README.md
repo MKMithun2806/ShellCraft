@@ -14,6 +14,10 @@
 
 ---
 
+<img width="2559" height="1599" alt="image" src="https://github.com/user-attachments/assets/4a90d008-ad80-4361-9a77-df61d03ea729" />
+
+---
+
 ## ✨ Features
 
 <table>
